@@ -1,0 +1,8 @@
+[deps]
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
+GraphsMatching = "c3af3a8c-b79e-4b01-bf44-c718d7e0e0d6"
+MAT = "23992714-dd62-5051-b70f-ba57cb901cac"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+PyQDecoders = "17f5de1a-9b79-4409-a58d-4d45812840f7"
+PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
+SweepContractor = "75a5deae-e917-4509-af32-a989148c8d5f"
