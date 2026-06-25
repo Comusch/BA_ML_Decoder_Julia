@@ -1,0 +1,327 @@
+Product-state PEPS size: (1, 1, 1, 1, 2, 2)
+Exact product probability: 0.041947040818652914
+Contracted product probability: 0.041947040818652775
+Absolute error: 1.3877787807814457e-16
+-------
+Calculating the recovery error and the topological sector for the product state...
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.3423437747354898, -4), (1.2907171106296471, -40), (1.3685643323797965, -41), (1.7191565524121288, -59)]
+Most likely topological sector (1, 2, 3, 4) possible: 1
+resulting Partition function: (1.3423437747354898, -4)
+-------
+time: 17.390129292
+-----------------------
+product state with p = 0.09549150281252627
+Product-state PEPS size: (1, 1, 1, 1, 2, 2)
+Exact product probability: 6.275561252207097e-22
+Contracted product probability: 6.275561252207088e-22
+Absolute error: 8.46355932592047e-37
+-------
+Calculating the recovery error and the topological sector for the product state...
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.2864288754941198, -65), (1.6240467227225364, -72), (1.2341904590681627, -67), (1.192536300594798, -71)]
+Most likely topological sector (1, 2, 3, 4) possible: 1
+resulting Partition function: (1.2864288754941198, -65)
+-------
+time: 0.982253824
+-----------------------
+product state with p = 0.2061073738537634
+Product-state PEPS size: (1, 1, 1, 1, 2, 2)
+Exact product probability: 8.752500060409239e-29
+Contracted product probability: 8.752500060409238e-29
+Absolute error: 1.1210387714598537e-44
+-------
+Calculating the recovery error and the topological sector for the product state...
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.003601715257608, -64), (1.407760264802483, -64), (1.5268378757953731, -65), (1.7239344139737807, -65)]
+Most likely topological sector (1, 2, 3, 4) possible: 2
+resulting Partition function: (1.407760264802483, -64)
+-------
+time: 0.292268039
+
+next ran:--------------------------------------------------------------------------------------------------------------------------------------
+project at `~/Documents/Studium/Julia_Programms`
+Loaded 400 samples from /home/conradin/Documents/Studium/Julia_Programms/PEPS_MWP_Project/generated_configurations/sampled_p=1_n_400.txt
+Sample 1: amplitude = (1.7147759089273102, -27)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.6920164475990562, -24), (1.7372626661235089, -23), (1.596348697023779, -23), (1.5866724334922568, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 2
+resulting Partition function: (1.7372626661235089, -23)
+-------
+Sample 2: amplitude = (1.4209932129414606, -26)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.623519030710487, -23), (1.4949178834627272, -23), (1.5386776364552763, -24), (1.9434701896633353, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 4
+resulting Partition function: (1.9434701896633353, -23)
+-------
+Sample 3: amplitude = (1.6515924082790034, -27)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.9425398733835308, -24), (1.7302978974147727, -23), (1.7269844104260579, -23), (1.6011775213538406, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 2
+resulting Partition function: (1.7302978974147727, -23)
+-------
+Sample 4: amplitude = (1.054847124093618, -33)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.210637877440982, -24), (1.7351682345614667, -23), (1.3922246077036313, -23), (1.37634995809177, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 2
+resulting Partition function: (1.7351682345614667, -23)
+-------
+Sample 5: amplitude = (1.6142634115397758, -31)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.7007400374349457, -23), (1.530183614780388, -23), (1.0038190271856133, -23), (1.8463507300898696, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 4
+resulting Partition function: (1.8463507300898696, -23)
+-------
+Sample 6: amplitude = (-1.0564695766283645, -28)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.5588627966127584, -23), (1.4841202994677947, -23), (1.4722676929247513, -24), (1.6913426616401759, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 4
+resulting Partition function: (1.6913426616401759, -23)
+-------
+Sample 7: amplitude = (-1.043838840912561, -30)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.0271797317760942, -22), (1.6170684745573234, -23), (1.042868162709345, -22), (1.6043107314463112, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 3
+resulting Partition function: (1.042868162709345, -22)
+-------
+Sample 8: amplitude = (1.5906047917054107, -23)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.024719976879988, -22), (1.559588040694079, -23), (1.0668086152435057, -23), (1.0021214899891393, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 1
+resulting Partition function: (1.024719976879988, -22)
+-------
+Sample 9: amplitude = (1.5630079337592004, -28)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.3780707337918274, -23), (1.8882670417161418, -23), (1.99518345996412, -23), (1.7666576082331855, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 3
+resulting Partition function: (1.99518345996412, -23)
+-------
+Sample 10: amplitude = (1.7199810049208073, -24)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.0336359388420933, -22), (1.7680561057995199, -23), (1.203890856645807, -23), (1.9884028690294708, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 1
+resulting Partition function: (1.0336359388420933, -22)
+-------
+Total time taken: 8.989136582 seconds
+
+next ran: xhi = 32---------------------------------------------------------------------------------------------------------
+Loaded 400 samples from /home/conradin/Documents/Studium/Julia_Programms/PEPS_MWP_Project/generated_configurations/sampled_p=1_n_400.txt
+Sample 1: amplitude = (1.7147759089273102, -27)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.5687190473613553, -23), (1.272241655698417, -22), (1.2434143918063425, -23), (1.4976339499041618, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 4
+resulting Partition function: (1.4976339499041618, -22)
+-------
+Sample 2: amplitude = (1.4209932129414606, -26)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.5671894011123184, -22), (1.6449213132145597, -22), (1.9782076382110523, -24), (1.494506069874794, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 2
+resulting Partition function: (1.6449213132145597, -22)
+-------
+Sample 3: amplitude = (1.6515924082790034, -27)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.1881369820744856, -23), (1.3117908413706854, -22), (1.8085403943931004, -23), (1.2486372469218443, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 2
+resulting Partition function: (1.3117908413706854, -22)
+-------
+Sample 4: amplitude = (1.054847124093618, -33)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.0425961720604748, -24), (1.2347137347094108, -22), (1.452232799861453, -22), (1.1282641650449146, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 3
+resulting Partition function: (1.452232799861453, -22)
+-------
+Sample 5: amplitude = (1.6142634115397758, -31)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.1565903423986512, -22), (1.7332128651524092, -23), (1.2991973917784891, -23), (1.2967462582821683, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 4
+resulting Partition function: (1.2967462582821683, -22)
+-------
+Sample 6: amplitude = (-1.0564695766283645, -28)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.6479147105612522, -23), (1.8403821445985464, -24), (1.2298817669945734, -23), (1.2395212526142307, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 4
+resulting Partition function: (1.2395212526142307, -22)
+-------
+Sample 7: amplitude = (-1.043838840912561, -30)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.3635636637094617, -22), (1.841118918582736, -23), (1.2265249144438035, -22), (1.0686933176056632, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 1
+resulting Partition function: (1.3635636637094617, -22)
+-------
+Sample 8: amplitude = (1.5906047917054107, -23)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.5517568695880926, -22), (1.1537991420865152, -22), (1.8484762773982018, -25), (1.5986208594590017, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 4
+resulting Partition function: (1.5986208594590017, -22)
+-------
+Sample 9: amplitude = (1.5630079337592004, -28)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.1482513718973015, -30), (1.502494729105671, -22), (1.8154858763182755, -22), (1.5695611626544745, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 3
+resulting Partition function: (1.8154858763182755, -22)
+-------
+Sample 10: amplitude = (1.7199810049208073, -24)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.4397324765219217, -23), (1.3477084646760558, -22), (1.3616866210724448, -22), (1.573202025680313, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 4
+resulting Partition function: (1.573202025680313, -22)
+-------
+Total time taken: 19.622413101 seconds
+
+next ran:----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Loaded 10 samples from /home/conradin/Documents/Studium/Julia_Programms/PEPS_MWP_Project/generated_configurations/sampled_p=24_n_10.txt
+Sample 1: amplitude = (1.2203733443613085, -34)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.19721870541174, -23), (1.1641377298655673, -22), (1.4861589559043669, -22), (1.1138443039865273, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 3
+resulting Partition function: (1.4861589559043669, -22)
+-------
+Sample 2: amplitude = (1.9009440550839187, -36)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.2408801556104283, -23), (1.1922668635859586, -22), (1.3306159218445746, -22), (1.7753298720816764, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 3
+resulting Partition function: (1.3306159218445746, -22)
+-------
+Sample 3: amplitude = (1.335738685123778, -27)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.8489858279217803, -24), (1.2725558994050212, -22), (1.5599842720051433, -22), (1.8848897731669014, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 3
+resulting Partition function: (1.5599842720051433, -22)
+-------
+Sample 4: amplitude = (1.81937623473141, -30)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.2840688645318814, -22), (1.0491037367463925, -23), (1.269396759720177, -22), (1.5198605470725293, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 4
+resulting Partition function: (1.5198605470725293, -22)
+-------
+Sample 5: amplitude = (1.2085713506188576, -31)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.435864419427413, -23), (1.0023756823693302, -22), (1.5233300876544464, -22), (1.9636433624931777, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 3
+resulting Partition function: (1.5233300876544464, -22)
+-------
+Sample 6: amplitude = (1.103588860406079, -30)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.845196824216254, -22), (1.5762947936707112, -23), (1.5766961629619818, -22), (1.126225353746549, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 1
+resulting Partition function: (1.845196824216254, -22)
+-------
+Sample 7: amplitude = (1.4666942934935252, -28)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.2605297885804099, -23), (1.2052063138615963, -23), (1.0528842022386038, -22), (1.4260560339401942, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 4
+resulting Partition function: (1.4260560339401942, -22)
+-------
+Sample 8: amplitude = (1.0339415806163124, -27)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.8415543671964933, -24), (1.271608732792521, -23), (1.1189859313513468, -22), (1.473978409519292, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 3
+resulting Partition function: (1.1189859313513468, -22)
+-------
+Sample 9: amplitude = (1.0344779029327098, -28)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.4899341107277864, -23), (1.7052706109268991, -23), (1.3432497555681082, -22), (1.6386460407668388, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 3
+resulting Partition function: (1.3432497555681082, -22)
+-------
+Sample 10: amplitude = (1.302500222983282, -26)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.0594801749749463, -23), (1.9951125505379645, -23), (1.3224026766893544, -22), (1.3148880681669837, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 3
+resulting Partition function: (1.3224026766893544, -22)
+-------
+Total time taken: 16.696059399 seconds
+
+next ran: xhi = 16---------------------------------------------------------------------------------------
+Loaded 20 samples from /home/conradin/Documents/Studium/Julia_Programms/PEPS_MWP_Project/generated_configurations/sampled_p=1_n_20.txt
+Sample 1: amplitude = (1.9921008986984774, -29)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.7421356557440761, -22), (1.8224253360683584, -23), (1.2683450169386543, -22), (1.3643585116289314, -24)]
+Most likely topological sector (1, 2, 3, 4) possible: 1
+resulting Partition function: (1.7421356557440761, -22)
+-------
+Sample 2: amplitude = (1.7631133013528622, -26)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.6032325404520686, -22), (1.9845057134220254, -24), (1.4039728310741437, -22), (1.2658155271579783, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 1
+resulting Partition function: (1.6032325404520686, -22)
+-------
+Sample 3: amplitude = (1.7497149337284796, -26)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.4992135171202408, -22), (1.1605679537620381, -23), (1.1586009520806568, -22), (1.423809254748071, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 1
+resulting Partition function: (1.4992135171202408, -22)
+-------
+Sample 4: amplitude = (1.681055378141727, -24)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.5495111039885323, -22), (1.7592867513435726, -23), (1.4833143143593874, -23), (1.0205990723235219, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 1
+resulting Partition function: (1.5495111039885323, -22)
+-------
+Sample 5: amplitude = (1.0474881122902693, -26)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.702072494444714, -22), (1.0320261662667, -22), (1.555459358716245, -23), (1.0193353495692472, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 1
+resulting Partition function: (1.702072494444714, -22)
+-------
+Sample 6: amplitude = (1.3209239487044409, -24)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.3836700271227205, -22), (1.0110398730059393, -22), (1.6400791178097713, -23), (1.8024908581681829, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 1
+resulting Partition function: (1.3836700271227205, -22)
+-------
+Sample 7: amplitude = (1.374856539459247, -27)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.2499073991718288, -22), (1.7019564113917116, -24), (1.8692942243994524, -23), (1.4825553228386656, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 4
+resulting Partition function: (1.4825553228386656, -22)
+-------
+Sample 8: amplitude = (1.505452543254222, -33)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.5011297540209492, -24), (1.509455572665221, -22), (1.1911646762568329, -22), (1.8261272854029436, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 2
+resulting Partition function: (1.509455572665221, -22)
+-------
+Sample 9: amplitude = (1.6281455867418875, -35)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.3691088687099306, -23), (1.0530327494882086, -22), (1.771282091704712, -23), (1.5891291652679094, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 2
+resulting Partition function: (1.0530327494882086, -22)
+-------
+Sample 10: amplitude = (1.4595168385878754, -28)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.2265572112629557, -22), (1.3074910532491026, -22), (1.5037279599037126, -23), (1.549571155447435, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 4
+resulting Partition function: (1.549571155447435, -22)
+-------
+Sample 11: amplitude = (1.1860884744010431, -27)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.0799508057517704, -21), (1.7641897317328223, -23), (1.5711594159504778, -23), (1.302079556004312, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 1
+resulting Partition function: (1.0799508057517704, -21)
+-------
+Sample 12: amplitude = (1.275607880063718, -21)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.5677567959586427, -22), (1.5557535206848758, -23), (1.701551627665585, -23), (1.3894615639264751, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 1
+resulting Partition function: (1.5677567959586427, -22)
+-------
+Sample 13: amplitude = (1.9625474436545136, -28)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.0569179185930389, -22), (1.7221722050751471, -22), (1.5760766105317567, -24), (1.4503978269047306, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 2
+resulting Partition function: (1.7221722050751471, -22)
+-------
+Sample 14: amplitude = (1.5344939424603952, -27)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.2959769855403742, -22), (1.9005412069271241, -23), (1.3482358673850607, -23), (1.171750889097599, -22)]
+Most likely topological sector (1, 2, 3, 4) possible: 1
+resulting Partition function: (1.2959769855403742, -22)
+-------
+Sample 15: amplitude = (1.0102032424546583, -26)
+ -> Calculating partition functions for the four topological sectors...
+Partition functions for the four sectors: [(1.5216023355192811, -23), (1.7500312854608446, -22), (1.3891765865119652, -22), (1.9098512339410854, -23)]
+Most likely topological sector (1, 2, 3, 4) possible: 2
+resulting Partition function: (1.7500312854608446, -22)
+-------
+Total time taken: 23.580995085 seconds

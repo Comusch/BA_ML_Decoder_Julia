@@ -5,9 +5,12 @@ include(joinpath(@__DIR__, "value_the_PEPS.jl"))
 include(joinpath(@__DIR__, "S_measurment_MWPM.jl"))
 
 using .PEPSValues
+using Distributed
 using Random
 using Plots
 using SweepContractor
+
+const PHASE_TRANSITION_PREPARED_WORKERS = Set{Int}()
 
 function load_path_samples(filename::String, width::Int, height::Int)
     samples = Vector{Tuple{Matrix{Tuple{Int,Int}},Tuple{Float64,Int}}}()
@@ -272,8 +275,8 @@ function load_peps_calculator()
         state_file;
         parameter_index=1,
         grid_size=grid_size,
-        sweep_chi=16,
-        sweep_tau=32,
+        sweep_chi=8,
+        sweep_tau=16,
     )
     return calculator
 end
@@ -330,8 +333,181 @@ function calculate_new_sample(p, calculator, grid_size)
     result_partition_function, max_index, modified_configuration = calculate_ML(reference_configuration, calculator, output=false)
     W_x_o, W_y_o = measurement_wilson_loops(configuration, reference_configuration)
     W_x, W_y = measurement_wilson_loops(configuration, modified_configuration)
-    return W_x, W_y, W_x_o, W_y_o
+    ml_changed = max_index == 1 ? 0 : 1
+    return W_x, W_y, W_x_o, W_y_o, ml_changed
 
+end
+
+function phase_transition_worker_ids()
+    return filter(process_id -> process_id != myid(), workers())
+end
+
+function prepare_phase_transition_workers!(worker_ids)
+    isempty(worker_ids) && return
+
+    project_dir = abspath(joinpath(@__DIR__, ".."))
+    peps_value_file = joinpath(@__DIR__, "value_the_PEPS.jl")
+    mwpm_file = joinpath(@__DIR__, "S_measurment_MWPM.jl")
+    source = read(@__FILE__, String)
+    helper_start = findfirst("function apply_logical_sector", source)
+    helper_end = findfirst("function phase_transition_worker_ids()", source)
+    isnothing(helper_start) && error("Could not find ML helper source start")
+    isnothing(helper_end) && error("Could not find ML helper source end")
+    helper_source = source[first(helper_start):(first(helper_end) - 1)]
+
+    for worker_id in worker_ids
+        worker_id in PHASE_TRANSITION_PREPARED_WORKERS && continue
+
+        remotecall_wait(
+            worker_id,
+            project_dir,
+            peps_value_file,
+            mwpm_file,
+            helper_source,
+        ) do project_dir, peps_value_file, mwpm_file, helper_source
+            Core.eval(Main, :(import Pkg))
+            Core.eval(Main, :(Pkg.activate($project_dir)))
+            include(peps_value_file)
+            include(mwpm_file)
+            Core.eval(Main, :(using .PEPSValues))
+            Core.eval(Main, :(using SweepContractor))
+            include_string(Main, helper_source, "phase_transition_worker_helpers.jl")
+
+            Core.eval(Main, quote
+                function calculate_phase_transition_sample_worker(p, calculator, grid_size)
+                    configuration = [
+                        (rand() < p ? 1 : 0, rand() < p ? 1 : 0)
+                        for _ in 1:grid_size[1], _ in 1:grid_size[2]
+                    ]
+
+                    syndromes = calculate_syndromes(configuration)
+                    reference_configuration = decoded_bit_MWPM(
+                        syndromes,
+                        grid_size[1],
+                        grid_size[2],
+                    )
+                    result_partition_function, max_index, modified_configuration =
+                        calculate_ML(reference_configuration, calculator, output=false)
+                    W_x_o, W_y_o = measurement_wilson_loops(
+                        configuration,
+                        reference_configuration,
+                    )
+                    W_x, W_y = measurement_wilson_loops(
+                        configuration,
+                        modified_configuration,
+                    )
+                    ml_changed = max_index == 1 ? 0 : 1
+                    return W_x, W_y, W_x_o, W_y_o, ml_changed
+                end
+            end)
+        end
+        push!(PHASE_TRANSITION_PREPARED_WORKERS, worker_id)
+    end
+end
+
+function calculate_phase_transition_samples_serial(
+    p,
+    calculator,
+    grid_size,
+    number_samples::Int;
+    progress_every::Int=1000,
+)
+    W_x_total = 0
+    W_y_total = 0
+    W_x_o_total = 0
+    W_y_o_total = 0
+    ml_changed_total = 0
+    start_time = time_ns()
+
+    elapsed_time = @elapsed begin
+        for i in 1:number_samples
+            W_x, W_y, W_x_o, W_y_o, ml_changed = calculate_new_sample(p, calculator, grid_size)
+            W_x_total += W_x
+            W_y_total += W_y
+            W_x_o_total += W_x_o
+            W_y_o_total += W_y_o
+            ml_changed_total += ml_changed
+
+            if progress_every > 0 && i % progress_every == 0
+                println(
+                    "grid size: ",
+                    grid_size[1],
+                    ", samples: ",
+                    i,
+                    ", wall time: ",
+                    round((time_ns() - start_time) / 1e9; digits=3),
+                    " seconds",
+                )
+            end
+        end
+    end
+
+    return W_x_total, W_y_total, W_x_o_total, W_y_o_total, ml_changed_total, elapsed_time
+end
+
+function calculate_phase_transition_samples(
+    p,
+    calculator,
+    grid_size,
+    number_samples::Int;
+    progress_every::Int=1000,
+    parallel::Symbol=:distributed,
+)
+    number_samples > 0 || throw(ArgumentError("number_samples must be positive"))
+    parallel in (:distributed, :serial) || throw(ArgumentError(
+        "parallel must be :distributed or :serial",
+    ))
+
+    if parallel == :distributed
+        worker_ids = phase_transition_worker_ids()
+        if !isempty(worker_ids)
+            prepare_phase_transition_workers!(worker_ids)
+            println(
+                "Running ",
+                number_samples,
+                " samples on ",
+                length(worker_ids),
+                " worker processes",
+            )
+            totals = [0, 0, 0, 0, 0]
+            elapsed_time = @elapsed begin
+                totals = @distributed (+) for _ in 1:number_samples
+                    W_x, W_y, W_x_o, W_y_o, ml_changed = calculate_phase_transition_sample_worker(
+                        p,
+                        calculator,
+                        grid_size,
+                    )
+                    [W_x, W_y, W_x_o, W_y_o, ml_changed]
+                end
+            end
+            return (
+                totals[1] / number_samples,
+                totals[2] / number_samples,
+                totals[3] / number_samples,
+                totals[4] / number_samples,
+                totals[5],
+                elapsed_time,
+            )
+        end
+
+        println("No distributed workers found; running samples serially.")
+    end
+
+    W_x_total, W_y_total, W_x_o_total, W_y_o_total, ml_changed_total, elapsed_time = calculate_phase_transition_samples_serial(
+        p,
+        calculator,
+        grid_size,
+        number_samples;
+        progress_every=progress_every,
+    )
+    return (
+        W_x_total / number_samples,
+        W_y_total / number_samples,
+        W_x_o_total / number_samples,
+        W_y_o_total / number_samples,
+        ml_changed_total,
+        elapsed_time,
+    )
 end
 
 function plot_average_w_total(
@@ -386,31 +562,28 @@ function sanity_check_PS_whole_phase_transition()
                 sweep_tau=8,
             )
             println("theta_without_pi = ", theta_without_pi, " => p = ", p)
-            W_x_total = 0
-            W_y_total = 0
-            W_x_o_total = 0
-            W_y_o_total = 0
-            time = 0.0
-            for i in 1:number_samples_per_theta
-                result = @timed calculate_new_sample(p, calculator, grid_size)
-                W_x_total += result.value[1]
-                W_y_total += result.value[2]
-                W_x_o_total += result.value[3]
-                W_y_o_total += result.value[4]
-                time += result.time
-                if i % 1000 == 0
-                    println("grid size: ", linear_size, ", samples: ", i, ", time: ", time, " seconds")
-                end
-            end
-
-            W_x_total /= number_samples_per_theta
-            W_y_total /= number_samples_per_theta
-            W_x_o_total /= number_samples_per_theta
-            W_y_o_total /= number_samples_per_theta
-            W_o_total = (W_x_o_total + W_y_o_total) / 2
+            W_x_total, W_y_total, W_x_o_total, W_y_o_total, ml_changed_total, time = calculate_phase_transition_samples(
+                p,
+                calculator,
+                grid_size,
+                number_samples_per_theta;
+                progress_every=1000,
+                parallel=:distributed,
+            )
             W_total = (W_x_total + W_y_total) / 2
+            W_o_total = (W_x_o_total + W_y_o_total) / 2
+            println("Sampling time: ", round(time; digits=3), " seconds")
             println("Average W_total (ML): ", W_total)
             println("Average W_total (MWPM): ", W_o_total)
+            println(
+                "ML changed sector: ",
+                ml_changed_total,
+                " / ",
+                number_samples_per_theta,
+                " samples (",
+                round(100 * ml_changed_total / number_samples_per_theta; digits=2),
+                "%)",
+            )
             push!(average_w_totals_by_size[linear_size], W_total)
             println("-------")
         end
@@ -420,10 +593,10 @@ function sanity_check_PS_whole_phase_transition()
     return thetas, average_w_totals_by_size
 end
 
-function sanity_check_simple_Product_state(theta)
+function sanity_check_simple_Product_state()
     ## here i want to define manually a PEPS for the product state to check how good the contraction is working.
     ## the product state is a PEPS with bond dimension 1
-    p = sin(theta*pi/2)^2
+    p = sin(0.1*pi/2)^2
     println("product state with p = ", p)
     grid_size = (8, 8)
     configuration = [
@@ -464,11 +637,10 @@ function test_loading_and_MWPM()
     println("Loaded $(length(samples)) samples from $path") 
 
     PEPS_calc = load_peps_calculator()
-    samples = unique(samples)[1:min(15, length(unique(samples)))]
-    
+
     for (sample_index, (configuration, amplitude)) in enumerate(samples)
         println("Sample $sample_index: amplitude = $amplitude")
-        syndroms_test = calculate_syndromes(configuration) 
+        syndroms_test = calculate_syndromes(configuration)
         #println("Syndromes for the first sample: ", syndroms_test)
         reference_configuration = decoded_bit_MWPM(syndroms_test, 8, 8)
         #println("Reference configuration: ", reference_configuration)
@@ -479,17 +651,10 @@ function test_loading_and_MWPM()
     end
 end
 
-"""
-time = @timed sanity_check_simple_Product_state(0.1)
-println("time: ", time.time)
-println("-----------------------")
-time = @timed sanity_check_simple_Product_state(0.2)
-println("time: ", time.time)
-println("-----------------------")
-time = @timed sanity_check_simple_Product_state(0.3)
-println("time: ", time.time)
-#sanity_check_PS_whole_phase_transition()
+
+#sanity_check_simple_Product_state()
+sanity_check_PS_whole_phase_transition()
 """
 timer = @timed test_loading_and_MWPM()
 println("Total time taken: ", timer.time, " seconds")
-
+"""

@@ -167,8 +167,8 @@ function mcmc_samples(
     initial_configuration::AbstractMatrix{<:Tuple},
     calculator::PEPSValues.PEPSValueCalculator;
     n_samples::Int,
-    burn_in::Int=100,
-    thinning::Int=10,
+    burn_in::Int=1,
+    thinning::Int=1,
     initial_amplitude=PEPSValues.scaled_value(calculator, initial_configuration),
 )
     n_samples > 0 || throw(ArgumentError("n_samples must be positive"))
@@ -218,7 +218,7 @@ function main()
     grid_size = (8, 8)
     calculator = PEPSValues.PEPSValueCalculator(
         state_file;
-        parameter_index=1,
+        parameter_index=24,
         grid_size=grid_size,
         sweep_chi=8,
         sweep_tau=16,
@@ -226,7 +226,7 @@ function main()
 
     # A single sweep evaluates 2 * prod(grid_size) = 128 contractions. Keep the
     # max_sweeps is small, because with that seeper it gets really fast in a local minimum.
-    max_sweeps = 10
+    max_sweeps = 1
     rng = MersenneTwister(1234)
     initial_configuration = [
         (rand(0:1), rand(0:1))
@@ -259,7 +259,7 @@ function main()
 
     println("-----")
     #now we want to use Markov Chain Monte Carlo to sample from the distribution defined by the PEPS amplitudes
-    n_samples = 400
+    n_samples = 20
     total_mcmc_information = @timed mcmc_samples(
         rng,
         configuration,
@@ -343,4 +343,4 @@ end
 #With this programm, samples are generated and written to a file, which have a large probability under the PEPS distribution
 #Problem there are samples, that are equivalent and can be distinguished, if we want just unique samples
 sampled_configurations, acceptance_rate = main()
-write_samples_to_file(sampled_configurations, joinpath(@__DIR__, "generated_configurations/sampled_p=1_n_400.txt"))
+write_samples_to_file(sampled_configurations, joinpath(@__DIR__, "generated_configurations/sampled_p=1_n_20.txt"))
