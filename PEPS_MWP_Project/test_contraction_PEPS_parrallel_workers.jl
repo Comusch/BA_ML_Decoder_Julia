@@ -142,6 +142,36 @@ function product_state_probability(
     return probability
 end
 
+function modify_iPEPS_to_probability_PEPS(ipeps::AbstractArray{<:Real,6})
+    left_dim, up_dim, right_dim, down_dim, h_physical_dim, v_physical_dim = size(ipeps)
+    new_peps = zeros(
+        Float64,
+        left_dim^2,
+        up_dim^2,
+        right_dim^2,
+        down_dim^2,
+        h_physical_dim,
+        v_physical_dim,
+    )
+
+    # This reshapes the double-layer virtual spaces via C^n tensor C^n ~= C^(n^2).
+    for l1 in 1:left_dim, u1 in 1:up_dim, r1 in 1:right_dim, d1 in 1:down_dim,
+        l2 in 1:left_dim, u2 in 1:up_dim, r2 in 1:right_dim, d2 in 1:down_dim,
+        h_index in 1:h_physical_dim, v_index in 1:v_physical_dim
+
+        new_peps[
+            (l1 - 1) * left_dim + l2,
+            (u1 - 1) * up_dim + u2,
+            (r1 - 1) * right_dim + r2,
+            (d1 - 1) * down_dim + d2,
+            h_index,
+            v_index,
+        ] = ipeps[l1, u1, r1, d1, h_index, v_index] *
+            ipeps[l2, u2, r2, d2, h_index, v_index]
+    end
+    return new_peps
+end
+
 """
     build_periodic_peps_with_extra_virtuals(ipeps, physical_configuration)
 
@@ -164,6 +194,7 @@ function build_periodic_peps_with_extra_virtuals(
         "Expected ipeps with 6 dimensions " *
         "(left, up, right, down, h_physical, v_physical), got $(ndims(ipeps))",
     )
+    ipeps = modify_iPEPS_to_probability_PEPS(ipeps)
     left_dim, up_dim, right_dim, down_dim, h_physical_dim, v_physical_dim = size(ipeps)
     h_physical_dim == 2 && v_physical_dim == 2 || error(
         "Expected ipeps size (left, up, right, down, h_physical, v_physical) " *
@@ -224,8 +255,8 @@ function build_periodic_peps_with_extra_virtuals(
                 site(x, down),          # PEPS down virtual leg
                 copylabel(x, y),        # t1
                 copylabel(right, y),    # t2 equals t1 of the right neighbour
-                copylabel(x, down),       # t3 equals t1 of the top neighbour
-            ], 
+                copylabel(x, down),     # t3 equals t1 of the bottom neighbour
+            ],
             site_tensor,
             x_position,
             y_position,
@@ -235,7 +266,7 @@ function build_periodic_peps_with_extra_virtuals(
             [
                 site(x, y),             # t1 of this site
                 site(left, y),          # t2 of the left neighbour
-                site(x, up),            # t3 of the bottom neighbour
+                site(x, up),            # t3 of the top neighbour
             ],
             equality_tensor,
             x_position - 0.18,
