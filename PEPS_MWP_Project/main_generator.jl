@@ -215,7 +215,7 @@ function main()
         "TC_non_sym_hz_0.2_hx=0.280_to_0.350_bond_dim_2_chi_40+state.mat",
     )
 
-    grid_size = (8, 8)
+    grid_size = (16, 16)
     calculator = PEPSValues.PEPSValueCalculator(
         state_file;
         parameter_index=24,
@@ -259,7 +259,7 @@ function main()
 
     println("-----")
     #now we want to use Markov Chain Monte Carlo to sample from the distribution defined by the PEPS amplitudes
-    n_samples = 20
+    n_samples = 2
     total_mcmc_information = @timed mcmc_samples(
         rng,
         configuration,
@@ -343,4 +343,4 @@ end
 #With this programm, samples are generated and written to a file, which have a large probability under the PEPS distribution
 #Problem there are samples, that are equivalent and can be distinguished, if we want just unique samples
 sampled_configurations, acceptance_rate = main()
-write_samples_to_file(sampled_configurations, joinpath(@__DIR__, "generated_configurations/sampled_p=1_n_20.txt"))
+write_samples_to_file(sampled_configurations, joinpath(@__DIR__, "generated_configurations/sampled_p=1_n_20_16.txt"))

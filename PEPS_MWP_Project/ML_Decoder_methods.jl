@@ -45,42 +45,32 @@ function load_path_samples(filename::String, width::Int, height::Int)
 end
 
 "Calculate for a given configuration the corresponding topological sector
-Returns new configuration: (s = 1 (no flip), s = 2 (flip first row), s = 3 (flip first column), s = 4 (flip first row and column))"
+Returns new configuration: (s = 1 (no flip), s = 2 (flip horizontal string in first row), s = 3 (flip vertical string in first column), s = 4 (flip both strings))"
 function apply_logical_sector(configuration::Matrix{Tuple{Int, Int}}, sector::Int)
     modified_configuration = copy(configuration)
     width, height = size(configuration, 2), size(configuration, 1)
 
     if sector == 1
         return modified_configuration
-    elseif sector == 3
-        for y in 1:height
-            modified_configuration[y, 1] = (
-                modified_configuration[y, 1][1],
-                1- modified_configuration[y, 1][2],
-            )
-        end
     elseif sector == 2
-        for x in 1:width
-            modified_configuration[1, x] = (
-                1- modified_configuration[1, x][1],
-                modified_configuration[1, x][2],
-            )
-        end
-    elseif sector == 4
-        for y in 1:height
-            modified_configuration[y, 1] = (
-                modified_configuration[y, 1][1],
-                1- modified_configuration[y, 1][2],
-            )
-        end
         for x in 1:width
             modified_configuration[1, x] = (
                 1 - modified_configuration[1, x][1],
                 modified_configuration[1, x][2],
             )
         end
+    elseif sector == 3
+        for y in 1:height
+            modified_configuration[y, 1] = (
+                modified_configuration[y, 1][1],
+                1 - modified_configuration[y, 1][2],
+            )
+        end
+    elseif sector == 4
+        modified_configuration = apply_logical_sector(modified_configuration, 2)
+        modified_configuration = apply_logical_sector(modified_configuration, 3)
     else
-        error("Invalid sector: $sector. Must be between 0 and 3.")
+        error("Invalid sector: $sector. Must be between 1 and 4.")
     end
 
     return modified_configuration

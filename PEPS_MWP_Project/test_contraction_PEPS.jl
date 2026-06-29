@@ -41,42 +41,32 @@ function load_path_samples(filename::String, width::Int, height::Int)
 end
 
 "Calculate for a given configuration the corresponding topological sector
-Returns new configuration: (s = 1 (no flip), s = 2 (flip first row), s = 3 (flip first column), s = 4 (flip first row and column))"
+Returns new configuration: (s = 1 (no flip), s = 2 (flip horizontal string in first row), s = 3 (flip vertical string in first column), s = 4 (flip both strings))"
 function apply_logical_sector(configuration::Matrix{Tuple{Int, Int}}, sector::Int)
     modified_configuration = copy(configuration)
     width, height = size(configuration, 2), size(configuration, 1)
 
     if sector == 1
         return modified_configuration
-    elseif sector == 3
-        for y in 1:height
-            modified_configuration[y, 1] = (
-                modified_configuration[y, 1][1],
-                1- modified_configuration[y, 1][2],
-            )
-        end
     elseif sector == 2
-        for x in 1:width
-            modified_configuration[1, x] = (
-                1- modified_configuration[1, x][1],
-                modified_configuration[1, x][2],
-            )
-        end
-    elseif sector == 4
-        for y in 1:height
-            modified_configuration[y, 1] = (
-                modified_configuration[y, 1][1],
-                1- modified_configuration[y, 1][2],
-            )
-        end
         for x in 1:width
             modified_configuration[1, x] = (
                 1 - modified_configuration[1, x][1],
                 modified_configuration[1, x][2],
             )
         end
+    elseif sector == 3
+        for y in 1:height
+            modified_configuration[y, 1] = (
+                modified_configuration[y, 1][1],
+                1 - modified_configuration[y, 1][2],
+            )
+        end
+    elseif sector == 4
+        modified_configuration = apply_logical_sector(modified_configuration, 2)
+        modified_configuration = apply_logical_sector(modified_configuration, 3)
     else
-        error("Invalid sector: $sector. Must be between 0 and 3.")
+        error("Invalid sector: $sector. Must be between 1 and 4.")
     end
 
     return modified_configuration
@@ -221,7 +211,7 @@ function build_periodic_peps_with_extra_virtuals(
                 site(x, down),          # PEPS down virtual leg
                 copylabel(x, y),        # t1
                 copylabel(right, y),    # t2 equals t1 of the right neighbour
-                copylabel(x, down),     # t3 equals t1 of the bottom neighbour
+                copylabel(x, up),       # t3 equals t1 of the top neighbour
             ],
             site_tensor,
             x_position,
@@ -232,7 +222,7 @@ function build_periodic_peps_with_extra_virtuals(
             [
                 site(x, y),             # t1 of this site
                 site(left, y),          # t2 of the left neighbour
-                site(x, up),            # t3 of the top neighbour
+                site(x, down),          # t3 of the bottom neighbour
             ],
             equality_tensor,
             x_position - 0.18,
@@ -317,8 +307,27 @@ function calculate_ML(reference_configuration::Matrix{Tuple{Int,Int}}, calculato
     return partition_functions[max_index], max_index, modifyed_configurations[max_index]
 end
 
+function print_ml_changed_sector_diagnostics(
+    sample_index,
+    p,
+    grid_size,
+    max_index,
+    partition_functions,
+    W_x,
+    W_y,
+    W_x_o,
+    W_y_o,
+)
+    println("ML changed sector sample: ", sample_index)
+    println("  grid size: ", grid_size, ", p: ", p)
+    println("  selected sector: ", max_index)
+    println("  partition functions by sector (mantissa, exponent): ", partition_functions)
+    println("  Wilson indicators MWPM: W_x = ", W_x_o, ", W_y = ", W_y_o)
+    println("  Wilson indicators ML:   W_x = ", W_x, ", W_y = ", W_y)
+end
 
-function calculate_new_sample(p, calculator, grid_size)
+
+function calculate_new_sample(p, calculator, grid_size; sample_index=nothing)
     configuration = [
         (rand() < p ? 1 : 0, rand() < p ? 1 : 0)
         for _ in 1:grid_size[1], _ in 1:grid_size[2]
@@ -327,9 +336,31 @@ function calculate_new_sample(p, calculator, grid_size)
     syndroms_test = calculate_syndromes(configuration)
     reference_configuration = decoded_bit_MWPM(syndroms_test, grid_size[1], grid_size[2])
 
-    result_partition_function, max_index, modified_configuration = calculate_ML(reference_configuration, calculator, output=false)
+    modifyed_configurations = [
+        apply_logical_sector(reference_configuration, sector)
+        for sector in 1:4
+    ]
+    partition_functions = [
+        Calculate_partition_function(modified_configuration, calculator)
+        for modified_configuration in modifyed_configurations
+    ]
+    max_index = find_max(partition_functions)
+    modified_configuration = modifyed_configurations[max_index]
     W_x_o, W_y_o = measurement_wilson_loops(configuration, reference_configuration)
     W_x, W_y = measurement_wilson_loops(configuration, modified_configuration)
+    if max_index != 1
+        print_ml_changed_sector_diagnostics(
+            isnothing(sample_index) ? "unknown" : sample_index,
+            p,
+            grid_size,
+            max_index,
+            partition_functions,
+            W_x,
+            W_y,
+            W_x_o,
+            W_y_o,
+        )
+    end
     return W_x, W_y, W_x_o, W_y_o
 
 end
@@ -376,7 +407,7 @@ function sanity_check_PS_whole_phase_transition()
         println("Running grid size ", grid_size)
 
         for theta_without_pi in thetas
-            p = sin(theta_without_pi*pi/2)^2
+            p = (sin(theta_without_pi*pi/2))^2
 
             ipeps = product_state_peps(p)
             calculator = PEPSValues.PEPSValueCalculator(
@@ -392,7 +423,7 @@ function sanity_check_PS_whole_phase_transition()
             W_y_o_total = 0
             time = 0.0
             for i in 1:number_samples_per_theta
-                result = @timed calculate_new_sample(p, calculator, grid_size)
+                result = @timed calculate_new_sample(p, calculator, grid_size; sample_index=i)
                 W_x_total += result.value[1]
                 W_y_total += result.value[2]
                 W_x_o_total += result.value[3]
@@ -492,4 +523,3 @@ println("time: ", time.time)
 """
 timer = @timed test_loading_and_MWPM()
 println("Total time taken: ", timer.time, " seconds")
-

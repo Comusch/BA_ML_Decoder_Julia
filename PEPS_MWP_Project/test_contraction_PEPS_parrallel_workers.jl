@@ -44,42 +44,42 @@ function load_path_samples(filename::String, width::Int, height::Int)
 end
 
 "Calculate for a given configuration the corresponding topological sector
-Returns new configuration: (s = 1 (no flip), s = 2 (flip first row), s = 3 (flip first column), s = 4 (flip first row and column))"
+Returns new configuration: (s = 1 (no flip), s = 2 (flip horizontal string in first row), s = 3 (flip vertical string in first column), s = 4 (flip both strings))"
 function apply_logical_sector(configuration::Matrix{Tuple{Int, Int}}, sector::Int)
     modified_configuration = copy(configuration)
     width, height = size(configuration, 2), size(configuration, 1)
 
     if sector == 1
         return modified_configuration
-    elseif sector == 3
-        for y in 1:height
-            modified_configuration[y, 1] = (
-                modified_configuration[y, 1][1],
-                1- modified_configuration[y, 1][2],
-            )
-        end
     elseif sector == 2
         for x in 1:width
             modified_configuration[1, x] = (
-                1- modified_configuration[1, x][1],
-                modified_configuration[1, x][2],
+                modified_configuration[1, x][1],
+                1 - modified_configuration[1, x][2],
+            )
+        end
+    elseif sector == 3
+        for y in 1:height
+            modified_configuration[y, 1] = (
+                1 - modified_configuration[y, 1][1],
+                modified_configuration[y, 1][2],
             )
         end
     elseif sector == 4
-        for y in 1:height
-            modified_configuration[y, 1] = (
-                modified_configuration[y, 1][1],
-                1- modified_configuration[y, 1][2],
+       for x in 1:width
+            modified_configuration[1, x] = (
+                modified_configuration[1, x][1],
+                1 - modified_configuration[1, x][2],
             )
         end
-        for x in 1:width
-            modified_configuration[1, x] = (
-                1 - modified_configuration[1, x][1],
-                modified_configuration[1, x][2],
+        for y in 1:height
+            modified_configuration[y, 1] = (
+                1 - modified_configuration[y, 1][1],
+                modified_configuration[y, 1][2],
             )
         end
     else
-        error("Invalid sector: $sector. Must be between 0 and 3.")
+        error("Invalid sector: $sector. Must be between 1 and 4.")
     end
 
     return modified_configuration
@@ -224,8 +224,8 @@ function build_periodic_peps_with_extra_virtuals(
                 site(x, down),          # PEPS down virtual leg
                 copylabel(x, y),        # t1
                 copylabel(right, y),    # t2 equals t1 of the right neighbour
-                copylabel(x, down),     # t3 equals t1 of the bottom neighbour
-            ],
+                copylabel(x, down),       # t3 equals t1 of the top neighbour
+            ], 
             site_tensor,
             x_position,
             y_position,
@@ -235,7 +235,7 @@ function build_periodic_peps_with_extra_virtuals(
             [
                 site(x, y),             # t1 of this site
                 site(left, y),          # t2 of the left neighbour
-                site(x, up),            # t3 of the top neighbour
+                site(x, up),            # t3 of the bottom neighbour
             ],
             equality_tensor,
             x_position - 0.18,
@@ -320,8 +320,42 @@ function calculate_ML(reference_configuration::Matrix{Tuple{Int,Int}}, calculato
     return partition_functions[max_index], max_index, modifyed_configurations[max_index]
 end
 
+function print_ml_changed_sector_diagnostics(
+    sample_index,
+    p,
+    grid_size,
+    max_index,
+    partition_functions,
+    W_x,
+    W_y,
+    W_x_o,
+    W_y_o,
+)
+    #println("--")
+    #println("ML changed sector sample: ", sample_index)
+   # println("  grid size: ", grid_size, ", p: ", p)
+    #println("  selected sector: ", max_index)
+    #println("  partition functions by sector: ", partition_functions)
+    #println("  Wilson indicators MWPM: W_x = ", W_x_o, ", W_y = ", W_y_o)
+   # println("  Wilson indicators ML:   W_x = ", W_x, ", W_y = ", W_y)
+end
 
-function calculate_new_sample(p, calculator, grid_size)
+function ml_change_outcome(W_x, W_y, W_x_o, W_y_o)
+    ml_score = W_x + W_y
+    mwpm_score = W_x_o + W_y_o
+    score_delta = ml_score - mwpm_score
+
+    if score_delta > 0
+        return 1, 0, 0, score_delta
+    elseif score_delta < 0
+        return 0, 1, 0, score_delta
+    else
+        return 0, 0, 1, score_delta
+    end
+end
+
+
+function calculate_new_sample(p, calculator, grid_size; sample_index=nothing)
     configuration = [
         (rand() < p ? 1 : 0, rand() < p ? 1 : 0)
         for _ in 1:grid_size[1], _ in 1:grid_size[2]
@@ -330,11 +364,35 @@ function calculate_new_sample(p, calculator, grid_size)
     syndroms_test = calculate_syndromes(configuration)
     reference_configuration = decoded_bit_MWPM(syndroms_test, grid_size[1], grid_size[2])
 
-    result_partition_function, max_index, modified_configuration = calculate_ML(reference_configuration, calculator, output=false)
+    modifyed_configurations = [
+        apply_logical_sector(reference_configuration, sector)
+        for sector in 1:4
+    ]
+    partition_functions = [
+        Calculate_partition_function(modified_configuration, calculator)
+        for modified_configuration in modifyed_configurations
+    ]
+    max_index = find_max(partition_functions)
+    modified_configuration = modifyed_configurations[max_index]
     W_x_o, W_y_o = measurement_wilson_loops(configuration, reference_configuration)
     W_x, W_y = measurement_wilson_loops(configuration, modified_configuration)
     ml_changed = max_index == 1 ? 0 : 1
-    return W_x, W_y, W_x_o, W_y_o, ml_changed
+    if ml_changed == 1
+        print_ml_changed_sector_diagnostics(
+            isnothing(sample_index) ? "unknown" : sample_index,
+            p,
+            grid_size,
+            max_index,
+            partition_functions,
+            W_x,
+            W_y,
+            W_x_o,
+            W_y_o,
+        )
+    end
+    ml_helped, ml_hurt, ml_unchanged_score, ml_score_delta =
+        ml_changed == 1 ? ml_change_outcome(W_x, W_y, W_x_o, W_y_o) : (0, 0, 0, 0)
+    return W_x, W_y, W_x_o, W_y_o, ml_changed, ml_helped, ml_hurt, ml_unchanged_score, ml_score_delta
 
 end
 
@@ -374,7 +432,7 @@ function prepare_phase_transition_workers!(worker_ids)
             include_string(Main, helper_source, "phase_transition_worker_helpers.jl")
 
             Core.eval(Main, quote
-                function calculate_phase_transition_sample_worker(p, calculator, grid_size)
+                function calculate_phase_transition_sample_worker(p, calculator, grid_size, sample_index)
                     configuration = [
                         (rand() < p ? 1 : 0, rand() < p ? 1 : 0)
                         for _ in 1:grid_size[1], _ in 1:grid_size[2]
@@ -386,8 +444,16 @@ function prepare_phase_transition_workers!(worker_ids)
                         grid_size[1],
                         grid_size[2],
                     )
-                    result_partition_function, max_index, modified_configuration =
-                        calculate_ML(reference_configuration, calculator, output=false)
+                    modifyed_configurations = [
+                        apply_logical_sector(reference_configuration, sector)
+                        for sector in 1:4
+                    ]
+                    partition_functions = [
+                        Calculate_partition_function(modified_configuration, calculator)
+                        for modified_configuration in modifyed_configurations
+                    ]
+                    max_index = find_max(partition_functions)
+                    modified_configuration = modifyed_configurations[max_index]
                     W_x_o, W_y_o = measurement_wilson_loops(
                         configuration,
                         reference_configuration,
@@ -397,7 +463,32 @@ function prepare_phase_transition_workers!(worker_ids)
                         modified_configuration,
                     )
                     ml_changed = max_index == 1 ? 0 : 1
-                    return W_x, W_y, W_x_o, W_y_o, ml_changed
+                    if ml_changed == 1
+                        print_ml_changed_sector_diagnostics(
+                            sample_index,
+                            p,
+                            grid_size,
+                            max_index,
+                            partition_functions,
+                            W_x,
+                            W_y,
+                            W_x_o,
+                            W_y_o,
+                        )
+                    end
+                    ml_helped, ml_hurt, ml_unchanged_score, ml_score_delta =
+                        ml_changed == 1 ? ml_change_outcome(W_x, W_y, W_x_o, W_y_o) : (0, 0, 0, 0)
+                    return (
+                        W_x,
+                        W_y,
+                        W_x_o,
+                        W_y_o,
+                        ml_changed,
+                        ml_helped,
+                        ml_hurt,
+                        ml_unchanged_score,
+                        ml_score_delta,
+                    )
                 end
             end)
         end
@@ -417,16 +508,29 @@ function calculate_phase_transition_samples_serial(
     W_x_o_total = 0
     W_y_o_total = 0
     ml_changed_total = 0
+    ml_helped_total = 0
+    ml_hurt_total = 0
+    ml_unchanged_score_total = 0
+    ml_score_delta_total = 0
     start_time = time_ns()
 
     elapsed_time = @elapsed begin
         for i in 1:number_samples
-            W_x, W_y, W_x_o, W_y_o, ml_changed = calculate_new_sample(p, calculator, grid_size)
+            W_x, W_y, W_x_o, W_y_o, ml_changed, ml_helped, ml_hurt, ml_unchanged_score, ml_score_delta = calculate_new_sample(
+                p,
+                calculator,
+                grid_size;
+                sample_index=i,
+            )
             W_x_total += W_x
             W_y_total += W_y
             W_x_o_total += W_x_o
             W_y_o_total += W_y_o
             ml_changed_total += ml_changed
+            ml_helped_total += ml_helped
+            ml_hurt_total += ml_hurt
+            ml_unchanged_score_total += ml_unchanged_score
+            ml_score_delta_total += ml_score_delta
 
             if progress_every > 0 && i % progress_every == 0
                 println(
@@ -442,7 +546,18 @@ function calculate_phase_transition_samples_serial(
         end
     end
 
-    return W_x_total, W_y_total, W_x_o_total, W_y_o_total, ml_changed_total, elapsed_time
+    return (
+        W_x_total,
+        W_y_total,
+        W_x_o_total,
+        W_y_o_total,
+        ml_changed_total,
+        ml_helped_total,
+        ml_hurt_total,
+        ml_unchanged_score_total,
+        ml_score_delta_total,
+        elapsed_time,
+    )
 end
 
 function calculate_phase_transition_samples(
@@ -469,15 +584,26 @@ function calculate_phase_transition_samples(
                 length(worker_ids),
                 " worker processes",
             )
-            totals = [0, 0, 0, 0, 0]
+            totals = [0, 0, 0, 0, 0, 0, 0, 0, 0]
             elapsed_time = @elapsed begin
-                totals = @distributed (+) for _ in 1:number_samples
-                    W_x, W_y, W_x_o, W_y_o, ml_changed = calculate_phase_transition_sample_worker(
+                totals = @distributed (+) for i in 1:number_samples
+                    W_x, W_y, W_x_o, W_y_o, ml_changed, ml_helped, ml_hurt, ml_unchanged_score, ml_score_delta = calculate_phase_transition_sample_worker(
                         p,
                         calculator,
                         grid_size,
+                        i,
                     )
-                    [W_x, W_y, W_x_o, W_y_o, ml_changed]
+                    [
+                        W_x,
+                        W_y,
+                        W_x_o,
+                        W_y_o,
+                        ml_changed,
+                        ml_helped,
+                        ml_hurt,
+                        ml_unchanged_score,
+                        ml_score_delta,
+                    ]
                 end
             end
             return (
@@ -486,6 +612,10 @@ function calculate_phase_transition_samples(
                 totals[3] / number_samples,
                 totals[4] / number_samples,
                 totals[5],
+                totals[6],
+                totals[7],
+                totals[8],
+                totals[9],
                 elapsed_time,
             )
         end
@@ -493,7 +623,7 @@ function calculate_phase_transition_samples(
         println("No distributed workers found; running samples serially.")
     end
 
-    W_x_total, W_y_total, W_x_o_total, W_y_o_total, ml_changed_total, elapsed_time = calculate_phase_transition_samples_serial(
+    W_x_total, W_y_total, W_x_o_total, W_y_o_total, ml_changed_total, ml_helped_total, ml_hurt_total, ml_unchanged_score_total, ml_score_delta_total, elapsed_time = calculate_phase_transition_samples_serial(
         p,
         calculator,
         grid_size,
@@ -506,6 +636,10 @@ function calculate_phase_transition_samples(
         W_x_o_total / number_samples,
         W_y_o_total / number_samples,
         ml_changed_total,
+        ml_helped_total,
+        ml_hurt_total,
+        ml_unchanged_score_total,
+        ml_score_delta_total,
         elapsed_time,
     )
 end
@@ -538,10 +672,14 @@ end
 
 function sanity_check_PS_whole_phase_transition()
 
-    thetas = [0.15, 0.175, 0.18, 0.19, 0.195, 0.2, 0.205, 0.21, 0.215, 0.22, 0.225]
-    grid_sizes = [8]
+    thetas = [0.1, 0.125, 0.15, 0.175, 0.18, 0.19, 0.195, 0.2, 0.205, 0.21, 0.215, 0.22, 0.225]
+    grid_sizes = [8, 16]
 
     average_w_totals_by_size = Dict(
+        grid_size => Float64[]
+        for grid_size in grid_sizes
+    )
+    average_w_totals_o_by_size = Dict(
         grid_size => Float64[]
         for grid_size in grid_sizes
     )
@@ -558,11 +696,22 @@ function sanity_check_PS_whole_phase_transition()
             calculator = PEPSValues.PEPSValueCalculator(
                 ipeps;
                 grid_size=grid_size,
-                sweep_chi=4,
-                sweep_tau=8,
+                sweep_chi=32,
+                sweep_tau=64,
             )
             println("theta_without_pi = ", theta_without_pi, " => p = ", p)
-            W_x_total, W_y_total, W_x_o_total, W_y_o_total, ml_changed_total, time = calculate_phase_transition_samples(
+            (
+                W_x_total,
+                W_y_total,
+                W_x_o_total,
+                W_y_o_total,
+                ml_changed_total,
+                ml_helped_total,
+                ml_hurt_total,
+                ml_unchanged_score_total,
+                ml_score_delta_total,
+                time,
+            ) = calculate_phase_transition_samples(
                 p,
                 calculator,
                 grid_size,
@@ -584,12 +733,29 @@ function sanity_check_PS_whole_phase_transition()
                 round(100 * ml_changed_total / number_samples_per_theta; digits=2),
                 "%)",
             )
+            println(
+                "ML change outcome: helped ",
+                ml_helped_total,
+                ", hurt ",
+                ml_hurt_total,
+                ", unchanged score ",
+                ml_unchanged_score_total,
+                " (net ",
+                ml_helped_total - ml_hurt_total,
+                ")",
+            )
+            println(
+                "ML W_total delta: ",
+                ml_score_delta_total / (2 * number_samples_per_theta),
+            )
             push!(average_w_totals_by_size[linear_size], W_total)
+            push!(average_w_totals_o_by_size[linear_size], W_o_total)
             println("-------")
         end
     end
 
     plot_average_w_total(thetas, average_w_totals_by_size, grid_sizes, filename="MWPM+ML_line_8_16.png")
+    plot_average_w_total(thetas, average_w_totals_o_by_size, grid_sizes, filename="MWPM_line_8_16.png")
     return thetas, average_w_totals_by_size
 end
 
@@ -608,8 +774,8 @@ function sanity_check_simple_Product_state()
     calculator = PEPSValues.PEPSValueCalculator(
         ipeps;
         grid_size=grid_size,
-        sweep_chi=4,
-        sweep_tau=8,
+        sweep_chi=16,
+        sweep_tau=32,
     )
 
     exact_probability = product_state_probability(configuration, p)

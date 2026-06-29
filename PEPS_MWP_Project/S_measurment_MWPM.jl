@@ -214,7 +214,7 @@ function test_ML(p::Float64=0.5)
     println("Measurement of Wilson loops: ", measurement_wilson_loops(configuration, decoded_bits.value))
 end
 
-#test_ML((sin(0.1*pi))^2)
+test_ML((sin(0.1*pi))^2)
 
 """
 test(0.3)
